@@ -1,0 +1,17 @@
+.container {
+  padding: 20px;
+  font-family: "sans-serif";
+}
+
+.images {
+  display: flex;
+  gap: 20px;
+}
+
+.images .image-container {
+  width: 444px;
+}
+
+.images .image-container img {
+  width: 400px;
+}
