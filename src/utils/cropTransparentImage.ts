@@ -1,4 +1,4 @@
-export async function cropTransparentImage(imageUrl: string): Promise<Blob> {
+export async function cropTransparentImage(imageUrl: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -59,10 +59,8 @@ export async function cropTransparentImage(imageUrl: string): Promise<Blob> {
         cropHeight
       );
 
-      croppedCanvas.toBlob((blob) => {
-        if (!blob) reject("Failed to crop");
-        else resolve(blob);
-      }, "image/png");
+      const pngDataUrl = croppedCanvas.toDataURL("image/png");
+      resolve(pngDataUrl);
     };
 
     img.onerror = reject;
