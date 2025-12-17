@@ -16,18 +16,40 @@ export default function App() {
 
     setLoading(true);
     try {
-      const segmenter = await pipeline("background-removal", model, {
+      const segmenter = await pipeline("image-segmentation", model, {
         dtype: "q8",
       });
 
       const imageUrl = URL.createObjectURL(file);
-      const output = await segmenter(imageUrl);
-      const bgRemovedBlob = await output[0].toBlob();
-      const bgRemovedUrl = URL.createObjectURL(bgRemovedBlob);
-      const croppedBlob = await cropTransparentImage(bgRemovedUrl);
-      setOutputImage(URL.createObjectURL(croppedBlob));
-    } catch (error) {
-      console.error("Error removing background:", error);
+      const results = await segmenter(imageUrl);
+      const mask = results[0].mask;
+
+      const img = new Image();
+      img.src = imageUrl;
+      await img.decode();
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d")!;
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      for (let i = 0; i < mask.data.length; i++) {
+        data[i * 4 + 3] = mask.data[i];
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      const transparentPNG = canvas.toDataURL("image/png");
+      const croppedPNG = await cropTransparentImage(transparentPNG);
+
+      setOutputImage(croppedPNG);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
