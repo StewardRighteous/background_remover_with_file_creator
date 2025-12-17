@@ -1,5 +1,8 @@
+body {
+  margin: 1rem;
+}
+
 .container {
-  padding: 20px;
   font-family: "sans-serif";
 }
 
@@ -14,4 +17,35 @@
 
 .images .image-container img {
   width: 400px;
+}
+
+.files {
+  display: flex;
+  gap: 12px;
+}
+
+.files > div {
+  box-sizing: border-box;
+  width: 538px;
+  height: 882px;
+  border: 1pt solid blue;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.files > div img {
+  display: inline-block;
+  flex-shrink: 1;
+  height: calc(882px - (161px + 1rem));
+  width: fit-content;
+}
+
+.bottom {
+  width: 497px;
+  height: 161px;
+  border-radius: 80px;
+  background-color: #d23a4b;
+  margin: 1rem;
 }
