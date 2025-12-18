@@ -35,17 +35,16 @@ body {
   align-items: center;
 }
 
-.files > div img {
-  display: inline-block;
+.background-removed img {
   flex-shrink: 1;
-  height: calc(882px - (161px + 1rem));
-  width: fit-content;
+  max-height: calc(882px - (161px + 1rem));
+  max-width: 100%;
 }
 
 .bottom {
   width: 497px;
   height: 161px;
   border-radius: 80px;
-  background-color: #d23a4b;
+  background-color: red;
   margin: 1rem;
 }

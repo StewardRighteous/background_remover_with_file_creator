@@ -1,28 +1,34 @@
 import { useState } from "react";
-import { addInchBorder } from "./utils/addInchBorder";
+import addMmBorder from "./utils/addMmBorder";
+import fillImageWithColor from "./utils/silhouettefill";
 
 type FilesProp = { image: string };
 
 export default function Files(prop: FilesProp) {
-  const [borderImage, setBorderImage] = useState<string | null>(null);
+  const [printingImage, setPrintingImage] = useState<string | null>(null);
+  const [cuttingImage, setCuttingImage] = useState<string | null>(null);
 
   async function getImage() {
-    const image = await addInchBorder(prop.image, 0.2);
-    setBorderImage(image);
+    const add7mmBorder = await addMmBorder(prop.image);
+    const add14mmBorder = await addMmBorder(add7mmBorder);
+    const fill7mmBorderImage = await fillImageWithColor(add7mmBorder);
+    const fill14mmBorderImage = await fillImageWithColor(add14mmBorder, "red");
+    setPrintingImage(fill7mmBorderImage);
+    setCuttingImage(fill14mmBorderImage);
   }
 
   return (
     <>
-      <button onClick={getImage}>show Border</button>
+      <button onClick={getImage}>Create files</button>
       <div className="files">
         <div className="background-removed">
           <img src={prop.image} alt="" />
         </div>
         <div className="printing-file">
-          {borderImage && <img src={borderImage} alt="" />}
+          {printingImage && <img src={printingImage} alt="" />}
         </div>
         <div className="cutting-file">
-          <img src={prop.image} alt="" />
+          {cuttingImage && <img src={cuttingImage} alt="" />}
           <div className="bottom"></div>
         </div>
       </div>
