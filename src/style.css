@@ -48,3 +48,9 @@ body {
   background-color: red;
   margin: 1rem;
 }
+
+.options {
+  margin-bottom: 8px;
+  display: flex;
+  gap: 8px;
+}
