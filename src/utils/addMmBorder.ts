@@ -1,14 +1,15 @@
-export async function addInchBorder(
+export default async function addMmBorder(
   imageUrl: string,
-  inch = 1,
+  mm = 7,
   dpi = 300,
-  color = "red"
+  color = "black"
 ): Promise<string> {
   const img = new Image();
   img.src = imageUrl;
   await img.decode();
 
-  const borderPx = Math.round(inch * dpi);
+  // Convert mm → pixels
+  const borderPx = Math.round((mm / 25.4) * dpi);
 
   // Expanded canvas
   const canvas = document.createElement("canvas");
@@ -25,7 +26,7 @@ export async function addInchBorder(
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imageData.data;
 
-  // Create halo
+  // Create halo border
   ctx.save();
   ctx.globalCompositeOperation = "destination-over";
   ctx.fillStyle = color;
