@@ -50,3 +50,9 @@ body {
   display: flex;
   gap: 8px;
 }
+
+.center-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

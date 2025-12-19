@@ -13,12 +13,14 @@ export default function Files(prop: FilesProp) {
   const [printingImage, setPrintingImage] = useState<string | null>(null);
   const [cuttingImage, setCuttingImage] = useState<string | null>(null);
   const [blueBoxHeight, setBlueBoxHeight] = useState(
-    `calc(${prop.height}px + 14mm + 1pt)`
+    `calc(${prop.height}px + 7in + 1pt)`
   );
   const [blueBoxWidth, setBlueBoxWidth] = useState(
     `calc(${prop.width}px + 14mm + 1pt)`
   );
   const [fileLoading, setFileLoading] = useState(false);
+  const [cuttingFileWidth, setCuttingFileWidth] = useState(prop.width);
+  const [cuttingFileHeight, setCuttingFileHeight] = useState(prop.height);
 
   async function changeBoxHeight() {
     const image = document.createElement("img");
@@ -26,6 +28,8 @@ export default function Files(prop: FilesProp) {
       image.src = cuttingImage;
       setBlueBoxHeight(`calc(${image.naturalHeight}px + 161px + 1pt)`);
       setBlueBoxWidth(`calc(${image.naturalWidth}px + 1pt + 16px)`);
+      setCuttingFileHeight(image.naturalHeight);
+      setCuttingFileWidth(image.naturalWidth);
     }
   }
 
@@ -81,7 +85,12 @@ export default function Files(prop: FilesProp) {
             height: blueBoxHeight,
           }}
         >
-          <img src={mainImage} alt="" />
+          <div
+            className="center-box"
+            style={{ width: cuttingFileWidth, height: cuttingFileHeight }}
+          >
+            <img src={mainImage} alt="" />
+          </div>
         </div>
         <div
           className="printing-file"
@@ -90,7 +99,14 @@ export default function Files(prop: FilesProp) {
             height: blueBoxHeight,
           }}
         >
-          {printingImage && <img src={printingImage} alt="" />}
+          {printingImage && (
+            <div
+              className="center-box"
+              style={{ width: cuttingFileWidth, height: cuttingFileHeight }}
+            >
+              <img src={printingImage} alt="" />
+            </div>
+          )}
         </div>
         <div
           className="cutting-file"
@@ -99,10 +115,17 @@ export default function Files(prop: FilesProp) {
             height: blueBoxHeight,
           }}
         >
-          {cuttingImage && <img src={cuttingImage} alt="" />}
+          {cuttingImage && (
+            <div
+              className="center-box"
+              style={{ width: cuttingFileWidth, height: cuttingFileHeight }}
+            >
+              <img src={cuttingImage} alt="" />
+            </div>
+          )}
           <div
             className="bottom"
-            style={{ width: `calc(${blueBoxWidth} - 1rem)` }}
+            style={{ width: `calc(${blueBoxWidth} + 1rem)` }}
           ></div>
         </div>
       </div>
