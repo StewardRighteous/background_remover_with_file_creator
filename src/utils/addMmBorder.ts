@@ -15,7 +15,7 @@ export default async function addMmBorder(
   canvas.width = img.width + borderPx * 2;
   canvas.height = img.height + borderPx * 2;
 
-  const ctx = canvas.getContext("2d")!;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Draw image in center
