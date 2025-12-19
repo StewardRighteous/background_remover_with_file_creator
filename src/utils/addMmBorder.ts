@@ -8,7 +8,6 @@ export default async function addMmBorder(
   img.src = imageUrl;
   await img.decode();
 
-  // Convert mm → pixels
   const borderPx = Math.round((mm / 25.4) * dpi);
 
   // Expanded canvas
@@ -26,7 +25,7 @@ export default async function addMmBorder(
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imageData.data;
 
-  // Create halo border
+  // Create halo
   ctx.save();
   ctx.globalCompositeOperation = "destination-over";
   ctx.fillStyle = color;
@@ -44,5 +43,46 @@ export default async function addMmBorder(
 
   ctx.restore();
 
-  return canvas.toDataURL("image/png");
+  //TRIM EMPTY TRANSPARENT AREA
+  const finalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const finalData = finalImageData.data;
+
+  let top = canvas.height,
+    left = canvas.width,
+    right = 0,
+    bottom = 0;
+
+  for (let y = 0; y < canvas.height; y++) {
+    for (let x = 0; x < canvas.width; x++) {
+      const alpha = finalData[(y * canvas.width + x) * 4 + 3];
+      if (alpha > 0) {
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+        top = Math.min(top, y);
+        bottom = Math.max(bottom, y);
+      }
+    }
+  }
+
+  const cropWidth = right - left + 1;
+  const cropHeight = bottom - top + 1;
+
+  const croppedCanvas = document.createElement("canvas");
+  croppedCanvas.width = cropWidth;
+  croppedCanvas.height = cropHeight;
+
+  const croppedCtx = croppedCanvas.getContext("2d")!;
+  croppedCtx.drawImage(
+    canvas,
+    left,
+    top,
+    cropWidth,
+    cropHeight,
+    0,
+    0,
+    cropWidth,
+    cropHeight
+  );
+
+  return croppedCanvas.toDataURL("image/png");
 }
