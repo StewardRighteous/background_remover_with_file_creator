@@ -1,6 +1,10 @@
 import { useState } from "react";
 import addMmBorder from "./utils/addMmBorder";
-import { fillImageWithColor } from "./utils/silhouettefill";
+import {
+  fillImageWithColor,
+  addBottomRedRectangleMm,
+  fillOuterSilhouetteRed,
+} from "./utils/silhouettefill";
 
 type FilesProp = { image: string; height: number; width: number };
 
@@ -31,8 +35,11 @@ export default function Files(prop: FilesProp) {
     const add14mmBorder = await addMmBorder(add7mmBorder);
     const fill7mmBorderImage = await fillImageWithColor(add7mmBorder);
     const fill14mmBorderImage = await fillImageWithColor(add14mmBorder, "red");
+    const addBottomRectangle =
+      await addBottomRedRectangleMm(fill14mmBorderImage);
+    const traceAndFillImage = await fillOuterSilhouetteRed(addBottomRectangle);
     setPrintingImage(fill7mmBorderImage);
-    setCuttingImage(fill14mmBorderImage);
+    setCuttingImage(traceAndFillImage);
     await changeBoxHeight();
     setFileLoading(false);
   }
