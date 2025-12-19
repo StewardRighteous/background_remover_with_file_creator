@@ -47,7 +47,10 @@ export default function Files(prop: FilesProp) {
   return (
     <>
       <div className="options">
-        <label htmlFor="image-change">Change Image: </label>
+        <label htmlFor="image-change">
+          Change Image (You can upload your file here, if you are not
+          satisfied):
+        </label>
         <input
           type="file"
           id="image-change"
@@ -58,9 +61,11 @@ export default function Files(prop: FilesProp) {
           }}
         />
         <button onClick={getImage} disabled={fileLoading}>
-          {fileLoading ? "Loading..." : "Create Files"}
+          {fileLoading ? "Loading..." : "Create Printing & Cutting Files"}
         </button>
-        <button onClick={() => setMainImage(prop.image)}>Reset</button>
+        <button onClick={() => setMainImage(prop.image)}>
+          Use Result Image
+        </button>
         {fileLoading && (
           <p style={{ color: "red" }}>
             If blue box is small! Click "Create files" again

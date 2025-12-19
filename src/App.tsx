@@ -59,7 +59,7 @@ export default function App() {
   return (
     <>
       <div className="container">
-        <h2>AI Background Remover</h2>
+        <h2>Background Remover</h2>
         <select
           name="model"
           id="model"
@@ -83,6 +83,16 @@ export default function App() {
         <button onClick={removeBackground} disabled={!file || loading}>
           {loading ? "Processing..." : "Remove Background"}
         </button>
+        {loading && (
+          <ul>
+            <li>This will take time and data !</li>
+            <li>If the browser asks to exit page select "wait"!</li>
+            <li>The lower the image size the faster the website will be !</li>
+            <li>
+              If you are not satisfied with the output, select and try "model 2"
+            </li>
+          </ul>
+        )}
         <hr />
         <div className="images">
           {file && (
