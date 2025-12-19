@@ -14,6 +14,7 @@ export default function Files(prop: FilesProp) {
   const [blueBoxWidth, setBlueBoxWidth] = useState(
     `calc(${prop.width}px + 14mm + 1pt)`
   );
+  const [fileLoading, setFileLoading] = useState(false);
 
   async function changeBoxHeight() {
     const image = document.createElement("img");
@@ -25,6 +26,7 @@ export default function Files(prop: FilesProp) {
   }
 
   async function getImage() {
+    setFileLoading(true);
     const add7mmBorder = await addMmBorder(mainImage);
     const add14mmBorder = await addMmBorder(add7mmBorder);
     const fill7mmBorderImage = await fillImageWithColor(add7mmBorder);
@@ -32,6 +34,7 @@ export default function Files(prop: FilesProp) {
     setPrintingImage(fill7mmBorderImage);
     setCuttingImage(fill14mmBorderImage);
     await changeBoxHeight();
+    setFileLoading(false);
   }
 
   return (
@@ -47,8 +50,15 @@ export default function Files(prop: FilesProp) {
             }
           }}
         />
-        <button onClick={getImage}>Create files</button>
+        <button onClick={getImage} disabled={fileLoading}>
+          {fileLoading ? "Loading..." : "Create Files"}
+        </button>
         <button onClick={() => setMainImage(prop.image)}>Reset</button>
+        {fileLoading && (
+          <p style={{ color: "red" }}>
+            If blue box is small! Click "Create files" again
+          </p>
+        )}
       </div>
 
       <div className="files">
