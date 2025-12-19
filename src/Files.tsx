@@ -1,13 +1,28 @@
 import { useState } from "react";
 import addMmBorder from "./utils/addMmBorder";
-import fillImageWithColor from "./utils/silhouettefill";
+import { fillImageWithColor } from "./utils/silhouettefill";
 
-type FilesProp = { image: string };
+type FilesProp = { image: string; height: number; width: number };
 
 export default function Files(prop: FilesProp) {
   const [mainImage, setMainImage] = useState(prop.image);
   const [printingImage, setPrintingImage] = useState<string | null>(null);
   const [cuttingImage, setCuttingImage] = useState<string | null>(null);
+  const [blueBoxHeight, setBlueBoxHeight] = useState(
+    `calc(${prop.height}px + 14mm + 1pt)`
+  );
+  const [blueBoxWidth, setBlueBoxWidth] = useState(
+    `calc(${prop.width}px + 14mm + 1pt)`
+  );
+
+  async function changeBoxHeight() {
+    const image = document.createElement("img");
+    if (cuttingImage !== null) {
+      image.src = cuttingImage;
+      setBlueBoxHeight(`calc(${image.naturalHeight}px + 161px + 1pt)`);
+      setBlueBoxWidth(`calc(${image.naturalWidth}px + 1pt + 16px)`);
+    }
+  }
 
   async function getImage() {
     const add7mmBorder = await addMmBorder(mainImage);
@@ -16,6 +31,7 @@ export default function Files(prop: FilesProp) {
     const fill14mmBorderImage = await fillImageWithColor(add14mmBorder, "red");
     setPrintingImage(fill7mmBorderImage);
     setCuttingImage(fill14mmBorderImage);
+    await changeBoxHeight();
   }
 
   return (
@@ -36,15 +52,36 @@ export default function Files(prop: FilesProp) {
       </div>
 
       <div className="files">
-        <div className="background-removed">
+        <div
+          className="background-removed"
+          style={{
+            width: blueBoxWidth,
+            height: blueBoxHeight,
+          }}
+        >
           <img src={mainImage} alt="" />
         </div>
-        <div className="printing-file">
+        <div
+          className="printing-file"
+          style={{
+            width: blueBoxWidth,
+            height: blueBoxHeight,
+          }}
+        >
           {printingImage && <img src={printingImage} alt="" />}
         </div>
-        <div className="cutting-file">
+        <div
+          className="cutting-file"
+          style={{
+            width: blueBoxWidth,
+            height: blueBoxHeight,
+          }}
+        >
           {cuttingImage && <img src={cuttingImage} alt="" />}
-          <div className="bottom"></div>
+          <div
+            className="bottom"
+            style={{ width: `calc(${blueBoxWidth} - 1rem)` }}
+          ></div>
         </div>
       </div>
     </>

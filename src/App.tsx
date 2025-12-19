@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { pipeline } from "@huggingface/transformers";
 import Files from "./Files";
 import { cropTransparentImage } from "./utils/cropTransparentImage";
@@ -10,6 +10,7 @@ export default function App() {
   const [outputImage, setOutputImage] = useState<string | null>(null);
   const [model, setModel] = useState<ModelType>("briaai/RMBG-1.4");
   const [loading, setLoading] = useState(false);
+  const originalImage = useRef<HTMLImageElement | null>(null);
 
   async function removeBackground() {
     if (!file) return;
@@ -87,7 +88,11 @@ export default function App() {
           {file && (
             <div className="image-container">
               <p>Original:</p>
-              <img src={URL.createObjectURL(file)} alt="Original" />
+              <img
+                src={URL.createObjectURL(file)}
+                alt="Original"
+                ref={originalImage}
+              />
             </div>
           )}
           {outputImage && (
@@ -98,7 +103,13 @@ export default function App() {
           )}
         </div>
       </div>
-      {outputImage && <Files image={outputImage} />}
+      {outputImage && originalImage.current && (
+        <Files
+          image={outputImage}
+          height={originalImage.current.naturalHeight}
+          width={originalImage.current.naturalWidth}
+        />
+      )}
     </>
   );
 }
