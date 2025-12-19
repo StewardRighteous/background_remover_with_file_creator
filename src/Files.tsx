@@ -21,13 +21,14 @@ export default function Files(prop: FilesProp) {
   const [fileLoading, setFileLoading] = useState(false);
   const [cuttingFileWidth, setCuttingFileWidth] = useState(prop.width);
   const [cuttingFileHeight, setCuttingFileHeight] = useState(prop.height);
+  const [bottomInch, setBottomInch] = useState<1.0 | 2.5>(1.0);
 
   async function changeBoxHeight() {
     const image = document.createElement("img");
     if (cuttingImage !== null) {
       image.src = cuttingImage;
-      setBlueBoxHeight(`calc(${image.naturalHeight}px + 161px + 1pt)`);
-      setBlueBoxWidth(`calc(${image.naturalWidth}px + 1pt + 16px)`);
+      setBlueBoxHeight(`calc(${image.naturalHeight}px + 2.5in + 1pt)`);
+      setBlueBoxWidth(`calc(${image.naturalWidth}px + 1pt + 16px + 2rem)`);
       setCuttingFileHeight(image.naturalHeight);
       setCuttingFileWidth(image.naturalWidth);
     }
@@ -64,6 +65,17 @@ export default function Files(prop: FilesProp) {
             }
           }}
         />
+        <label htmlFor="bottom-inch">Bottom :</label>
+        <select
+          name="bottom-inch"
+          id="bottom-inch"
+          onChange={(e) =>
+            setBottomInch(Number(e.target.value) == 2.5 ? 2.5 : 1.0)
+          }
+        >
+          <option value="1">1 Inch</option>
+          <option value="2.5">2.5 Inch</option>
+        </select>
         <button onClick={getImage} disabled={fileLoading}>
           {fileLoading ? "Loading..." : "Create Printing & Cutting Files"}
         </button>
@@ -125,7 +137,10 @@ export default function Files(prop: FilesProp) {
           )}
           <div
             className="bottom"
-            style={{ width: `calc(${blueBoxWidth} + 1rem)` }}
+            style={{
+              width: `calc(${cuttingFileWidth} + 1rem)`,
+              height: `${bottomInch}in`,
+            }}
           ></div>
         </div>
       </div>
