@@ -24,7 +24,9 @@ body {
   gap: 12px;
 }
 
-.files > div {
+.background-removed,
+.printing-file,
+.cutting-file {
   box-sizing: border-box;
   border: 1pt solid blue;
   flex-shrink: 0;

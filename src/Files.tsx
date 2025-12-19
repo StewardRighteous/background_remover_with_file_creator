@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import addMmBorder from "./utils/addMmBorder";
 import {
   fillImageWithColor,
   addBottomRedRectangleMm,
   fillOuterSilhouetteRed,
 } from "./utils/silhouettefill";
+import { printDivAsPdfWithBorder } from "./utils/pdfGenerator";
 
 type FilesProp = { image: string; height: number; width: number };
 
@@ -22,6 +23,9 @@ export default function Files(prop: FilesProp) {
   const [cuttingFileWidth, setCuttingFileWidth] = useState(prop.width);
   const [cuttingFileHeight, setCuttingFileHeight] = useState(prop.height);
   const [bottomInch, setBottomInch] = useState<1.0 | 2.5>(1.0);
+  const backgroundFile = useRef<HTMLDivElement>(null);
+  const printingFile = useRef<HTMLDivElement>(null);
+  const cuttingFile = useRef<HTMLDivElement>(null);
 
   async function changeBoxHeight() {
     const image = document.createElement("img");
@@ -87,6 +91,32 @@ export default function Files(prop: FilesProp) {
             If blue box is small! Click "Create files" again
           </p>
         )}
+        {printingImage && cuttingImage && (
+          <button
+            onClick={() => {
+              if (
+                backgroundFile.current &&
+                printingFile.current &&
+                cuttingFile.current
+              ) {
+                printDivAsPdfWithBorder(
+                  backgroundFile.current,
+                  "background.pdf"
+                );
+                printDivAsPdfWithBorder(
+                  printingFile.current,
+                  "printing_file.pdf"
+                );
+                printDivAsPdfWithBorder(
+                  cuttingFile.current,
+                  "cutting_file.pdf"
+                );
+              }
+            }}
+          >
+            Download Files
+          </button>
+        )}
       </div>
 
       <div className="files">
@@ -96,6 +126,7 @@ export default function Files(prop: FilesProp) {
             width: blueBoxWidth,
             height: blueBoxHeight,
           }}
+          ref={backgroundFile}
         >
           <div
             className="center-box"
@@ -110,6 +141,7 @@ export default function Files(prop: FilesProp) {
             width: blueBoxWidth,
             height: blueBoxHeight,
           }}
+          ref={printingFile}
         >
           {printingImage && (
             <div
@@ -126,6 +158,7 @@ export default function Files(prop: FilesProp) {
             width: blueBoxWidth,
             height: blueBoxHeight,
           }}
+          ref={cuttingFile}
         >
           {cuttingImage && (
             <div
@@ -138,7 +171,7 @@ export default function Files(prop: FilesProp) {
           <div
             className="bottom"
             style={{
-              width: `calc(${cuttingFileWidth} + 1rem)`,
+              width: `calc(${cuttingFileWidth}px + 1rem)`,
               height: `${bottomInch}in`,
             }}
           ></div>
