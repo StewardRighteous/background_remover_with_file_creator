@@ -11,16 +11,24 @@ export default function App() {
   const [model, setModel] = useState<ModelType>("briaai/RMBG-1.4");
   const [loading, setLoading] = useState(false);
   const originalImage = useRef<HTMLImageElement | null>(null);
+  const [loadingInstructions, setLoadingInstructions] = useState<
+    | "Loading Model"
+    | "Removing Background"
+    | "Converting Image"
+    | "Showing Output"
+  >("Loading Model");
 
   async function removeBackground() {
     if (!file) return;
-
+    setOutputImage(null);
     setLoading(true);
     try {
+      setLoadingInstructions("Loading Model");
       const segmenter = await pipeline("image-segmentation", model, {
         dtype: "q8",
       });
 
+      setLoadingInstructions("Removing Background");
       const imageUrl = URL.createObjectURL(file);
       const results = await segmenter(imageUrl);
       const mask = results[0].mask;
@@ -29,6 +37,7 @@ export default function App() {
       img.src = imageUrl;
       await img.decode();
 
+      setLoadingInstructions("Converting Image");
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d")!;
       canvas.width = img.width;
@@ -45,6 +54,7 @@ export default function App() {
 
       ctx.putImageData(imageData, 0, 0);
 
+      setLoadingInstructions("Showing Output");
       const transparentPNG = canvas.toDataURL("image/png");
       const croppedPNG = await cropTransparentImage(transparentPNG);
 
@@ -81,7 +91,7 @@ export default function App() {
           onChange={(e) => setFile(e.target.files?.[0] || null)}
         />
         <button onClick={removeBackground} disabled={!file || loading}>
-          {loading ? "Processing..." : "Remove Background"}
+          {loading ? loadingInstructions : "Remove Background"}
         </button>
         {loading && (
           <ul>
@@ -108,7 +118,11 @@ export default function App() {
           {outputImage && (
             <div className="image-container">
               <p>Result:</p>
-              <img src={outputImage} alt="Background Removed" />
+              {loading ? (
+                <p>{loadingInstructions}</p>
+              ) : (
+                <img src={outputImage} alt="Background Removed" />
+              )}
             </div>
           )}
         </div>
