@@ -113,13 +113,7 @@ export default function App() {
           )}
         </div>
       </div>
-      {outputImage && originalImage.current && (
-        <Files
-          image={outputImage}
-          height={originalImage.current.naturalHeight}
-          width={originalImage.current.naturalWidth}
-        />
-      )}
+      {outputImage && originalImage.current && <Files image={outputImage} />}
     </>
   );
 }

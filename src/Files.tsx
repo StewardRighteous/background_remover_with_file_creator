@@ -7,49 +7,34 @@ import {
 } from "./utils/silhouettefill";
 import { printDivAsPdfWithBorder } from "./utils/pdfGenerator";
 
-type FilesProp = { image: string; height: number; width: number };
+type FilesProp = { image: string };
 
 export default function Files(prop: FilesProp) {
+  const [imageSize, setImageSize] = useState<3 | 7>(3);
   const [mainImage, setMainImage] = useState(prop.image);
+
   const [printingImage, setPrintingImage] = useState<string | null>(null);
   const [cuttingImage, setCuttingImage] = useState<string | null>(null);
-  const [blueBoxHeight, setBlueBoxHeight] = useState(
-    `calc(${prop.height}px + 7in + 1pt)`
-  );
-  const [blueBoxWidth, setBlueBoxWidth] = useState(
-    `calc(${prop.width}px + 14mm + 1pt)`
-  );
   const [fileLoading, setFileLoading] = useState(false);
-  const [cuttingFileWidth, setCuttingFileWidth] = useState(prop.width);
-  const [cuttingFileHeight, setCuttingFileHeight] = useState(prop.height);
-  const [bottomInch, setBottomInch] = useState<1.0 | 2.5>(1.0);
+
   const backgroundFile = useRef<HTMLDivElement>(null);
   const printingFile = useRef<HTMLDivElement>(null);
   const cuttingFile = useRef<HTMLDivElement>(null);
 
-  async function changeBoxHeight() {
-    const image = document.createElement("img");
-    if (cuttingImage !== null) {
-      image.src = cuttingImage;
-      setBlueBoxHeight(`calc(${image.naturalHeight}px + 2.5in + 1pt)`);
-      setBlueBoxWidth(`calc(${image.naturalWidth}px + 1pt + 16px + 2rem)`);
-      setCuttingFileHeight(image.naturalHeight);
-      setCuttingFileWidth(image.naturalWidth);
-    }
-  }
-
   async function getImage() {
     setFileLoading(true);
-    const add7mmBorder = await addMmBorder(mainImage);
-    const add14mmBorder = await addMmBorder(add7mmBorder);
-    const fill7mmBorderImage = await fillImageWithColor(add7mmBorder);
-    const fill14mmBorderImage = await fillImageWithColor(add14mmBorder, "red");
-    const addBottomRectangle =
-      await addBottomRedRectangleMm(fill14mmBorderImage);
-    const traceAndFillImage = await fillOuterSilhouetteRed(addBottomRectangle);
-    setPrintingImage(fill7mmBorderImage);
-    setCuttingImage(traceAndFillImage);
-    await changeBoxHeight();
+
+    const printingImage = await fillImageWithColor(
+      await addMmBorder(mainImage)
+    );
+    const cuttingImage = await fillOuterSilhouetteRed(
+      await addBottomRedRectangleMm(
+        await fillImageWithColor(await addMmBorder(mainImage, 14), "red")
+      )
+    );
+
+    setPrintingImage(printingImage);
+    setCuttingImage(cuttingImage);
     setFileLoading(false);
   }
 
@@ -69,16 +54,14 @@ export default function Files(prop: FilesProp) {
             }
           }}
         />
-        <label htmlFor="bottom-inch">Bottom :</label>
+        <label htmlFor="bottom-inch">Image Size:</label>
         <select
           name="bottom-inch"
           id="bottom-inch"
-          onChange={(e) =>
-            setBottomInch(Number(e.target.value) == 2.5 ? 2.5 : 1.0)
-          }
+          onChange={(e) => setImageSize(Number(e.target.value) == 3 ? 3 : 7)}
         >
-          <option value="1">1 Inch</option>
-          <option value="2.5">2.5 Inch</option>
+          <option value={3}>3 Inch</option>
+          <option value={7}>7 Inch</option>
         </select>
         <button onClick={getImage} disabled={fileLoading}>
           {fileLoading ? "Loading..." : "Create Printing & Cutting Files"}
@@ -120,59 +103,28 @@ export default function Files(prop: FilesProp) {
       </div>
 
       <div className="files">
-        <div
-          className="background-removed"
-          style={{
-            width: blueBoxWidth,
-            height: blueBoxHeight,
-          }}
-          ref={backgroundFile}
-        >
-          <div
-            className="center-box"
-            style={{ width: cuttingFileWidth, height: cuttingFileHeight }}
-          >
+        <div className="background-removed" ref={backgroundFile}>
+          <div className="center-box">
             <img src={mainImage} alt="" />
           </div>
         </div>
-        <div
-          className="printing-file"
-          style={{
-            width: blueBoxWidth,
-            height: blueBoxHeight,
-          }}
-          ref={printingFile}
-        >
+        <div className="printing-file" ref={printingFile}>
           {printingImage && (
-            <div
-              className="center-box"
-              style={{ width: cuttingFileWidth, height: cuttingFileHeight }}
-            >
+            <div className="center-box">
               <img src={printingImage} alt="" />
             </div>
           )}
         </div>
-        <div
-          className="cutting-file"
-          style={{
-            width: blueBoxWidth,
-            height: blueBoxHeight,
-          }}
-          ref={cuttingFile}
-        >
+        <div className="cutting-file" ref={cuttingFile}>
           {cuttingImage && (
-            <div
-              className="center-box"
-              style={{ width: cuttingFileWidth, height: cuttingFileHeight }}
-            >
+            <div className="center-box">
               <img src={cuttingImage} alt="" />
             </div>
           )}
           <div
             className="bottom"
             style={{
-              width: `calc(${cuttingFileWidth}px + 1rem)`,
-              height: `${bottomInch}in`,
+              height: `${imageSize == 3 ? 1 : 2.5}in`,
             }}
           ></div>
         </div>
