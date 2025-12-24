@@ -1,7 +1,7 @@
 export default async function addMmBorder(
   imageUrl: string,
   mm = 7,
-  dpi = 300,
+  dpi = 96,
   color = "black"
 ): Promise<string> {
   const img = new Image();

@@ -27,7 +27,7 @@ export async function fillImageWithColor(
 export async function addBottomRedRectangleMm(
   imageUrl: string,
   mm = 7,
-  dpi = 300
+  dpi = 96
 ): Promise<string> {
   const img = new Image();
   img.src = imageUrl;
