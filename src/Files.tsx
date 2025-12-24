@@ -6,6 +6,7 @@ import {
   fillOuterSilhouetteRed,
 } from "./utils/silhouettefill";
 import resizeImageToInchHeight from "./utils/resizeImage";
+import { useReactToPrint } from "react-to-print";
 
 type FilesProp = { image: string };
 
@@ -27,6 +28,39 @@ export default function Files(prop: FilesProp) {
 
   const cuttingFileResultImage = useRef<HTMLImageElement | null>(null);
   const [cuttingFileResultWidth, setCuttingFileResultWidth] = useState(0);
+
+  const backgroundImageFile = useRef<HTMLDivElement | null>(null);
+  const printingImageFile = useRef<HTMLDivElement | null>(null);
+  const cuttingImageFile = useRef<HTMLDivElement | null>(null);
+  const size = imageSize == 3 ? 7 : 12;
+
+  const printMainFile = useReactToPrint({
+    contentRef: backgroundImageFile,
+    documentTitle: "MainFile.pdf",
+    pageStyle: `
+      @page{
+        size:  ${size}in ${size}in ;
+      }
+    `,
+  });
+  const printPrintFile = useReactToPrint({
+    contentRef: printingImageFile,
+    documentTitle: "PrintFile.pdf",
+    pageStyle: `
+      @page{
+        size:  ${size}in ${size}in ;
+      }
+    `,
+  });
+  const printCuttingFile = useReactToPrint({
+    contentRef: cuttingImageFile,
+    documentTitle: "CuttingFile.pdf",
+    pageStyle: `
+      @page{
+        size:  ${size}in ${size}in ;
+      }
+    `,
+  });
 
   async function getImage() {
     setFileLoading(true);
@@ -95,18 +129,25 @@ export default function Files(prop: FilesProp) {
           Use Result Image
         </button>
       </div>
+      <div className="options">
+        {backgroundImage && (
+          <button onClick={printMainFile}>Print Main File</button>
+        )}
+        {printingImage && (
+          <button onClick={printPrintFile}>Print Printing File</button>
+        )}
+        {cuttingImage && (
+          <button onClick={printCuttingFile}>Print Cutting File</button>
+        )}
+      </div>
 
       <div className="files">
         <div
           className="background-removed"
+          ref={backgroundImageFile}
           style={{
             height: imageSize == 3 ? "7in" : "12in",
-            width:
-              cuttingFileResultImage !== null
-                ? `calc(${cuttingFileResultWidth}px + 1pt + 7rem)`
-                : imageSize == 3
-                  ? "5in"
-                  : "9in",
+            width: imageSize == 3 ? "7in" : "12in",
           }}
         >
           <div
@@ -121,14 +162,10 @@ export default function Files(prop: FilesProp) {
         </div>
         <div
           className="printing-file"
+          ref={printingImageFile}
           style={{
             height: imageSize == 3 ? "7in" : "12in",
-            width:
-              cuttingFileResultImage !== null
-                ? `calc(${cuttingFileResultWidth}px + 1pt + 7rem)`
-                : imageSize == 3
-                  ? "5in"
-                  : "9in",
+            width: imageSize == 3 ? "7in" : "12in",
           }}
         >
           <div
@@ -143,14 +180,10 @@ export default function Files(prop: FilesProp) {
         </div>
         <div
           className="cutting-file"
+          ref={cuttingImageFile}
           style={{
             height: imageSize == 3 ? "7in" : "12in",
-            width:
-              cuttingFileResultImage !== null
-                ? `calc(${cuttingFileResultWidth}px + 1pt + 7rem)`
-                : imageSize == 3
-                  ? "5in"
-                  : "9in",
+            width: imageSize == 3 ? "7in" : "12in",
           }}
         >
           <div

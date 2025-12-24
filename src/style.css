@@ -60,3 +60,19 @@ body {
   align-items: center;
   justify-content: center;
 }
+
+@page {
+  margin: 0px;
+  position: relative;
+}
+
+@media print {
+  .background-removed,
+  .printing-file,
+  .cutting-file {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border: 1pt solid blue;
+  }
+}
