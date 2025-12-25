@@ -32,14 +32,15 @@ export default function Files(prop: FilesProp) {
   const backgroundImageFile = useRef<HTMLDivElement | null>(null);
   const printingImageFile = useRef<HTMLDivElement | null>(null);
   const cuttingImageFile = useRef<HTMLDivElement | null>(null);
-  const size = imageSize == 3 ? 7 : 12;
+  const height = imageSize == 3 ? 5 : 11;
+  const width = Math.ceil(cuttingFileResultWidth / 96) + 1;
 
   const printMainFile = useReactToPrint({
     contentRef: backgroundImageFile,
     documentTitle: "MainFile.pdf",
     pageStyle: `
       @page{
-        size:  ${size}in ${size}in ;
+        size:  ${width}in ${height}in ;
       }
     `,
   });
@@ -48,7 +49,7 @@ export default function Files(prop: FilesProp) {
     documentTitle: "PrintFile.pdf",
     pageStyle: `
       @page{
-        size:  ${size}in ${size}in ;
+        size:  ${width}in ${height}in ;
       }
     `,
   });
@@ -57,7 +58,7 @@ export default function Files(prop: FilesProp) {
     documentTitle: "CuttingFile.pdf",
     pageStyle: `
       @page{
-        size:  ${size}in ${size}in ;
+        size:  ${width}in ${height}in ;
       }
     `,
   });
@@ -146,8 +147,13 @@ export default function Files(prop: FilesProp) {
           className="background-removed"
           ref={backgroundImageFile}
           style={{
-            height: imageSize == 3 ? "7in" : "12in",
-            width: imageSize == 3 ? "7in" : "12in",
+            height: imageSize == 3 ? "5in" : "11in",
+            width:
+              cuttingFileResultWidth !== null
+                ? `${Math.ceil(cuttingFileResultWidth / 96) + 1}in`
+                : imageSize == 3
+                  ? "5in"
+                  : "9in",
           }}
         >
           <div
@@ -164,8 +170,13 @@ export default function Files(prop: FilesProp) {
           className="printing-file"
           ref={printingImageFile}
           style={{
-            height: imageSize == 3 ? "7in" : "12in",
-            width: imageSize == 3 ? "7in" : "12in",
+            height: imageSize == 3 ? "5in" : "11in",
+            width:
+              cuttingFileResultWidth !== null
+                ? `${Math.ceil(cuttingFileResultWidth / 96) + 1}in`
+                : imageSize == 3
+                  ? "5in"
+                  : "9in",
           }}
         >
           <div
@@ -182,8 +193,13 @@ export default function Files(prop: FilesProp) {
           className="cutting-file"
           ref={cuttingImageFile}
           style={{
-            height: imageSize == 3 ? "7in" : "12in",
-            width: imageSize == 3 ? "7in" : "12in",
+            height: imageSize == 3 ? "5in" : "11in",
+            width:
+              cuttingFileResultWidth !== null
+                ? `${Math.ceil(cuttingFileResultWidth / 96) + 1}in`
+                : imageSize == 3
+                  ? "5in"
+                  : "9in",
           }}
         >
           <div
