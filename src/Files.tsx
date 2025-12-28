@@ -18,7 +18,7 @@ export default function Files(prop: FilesProp) {
 
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [printingImageSVG, setPrintingImageSVG] = useState<string | null>(null);
-  const [cuttingImage, setCuttingImage] = useState<string | null>(null);
+  const [cuttingImageSVG, setCuttingImageSVG] = useState<string | null>(null);
 
   const [fileLoading, setFileLoading] = useState(false);
   const [fileLoadingInstructions, setFileLoadingInstructions] = useState<
@@ -92,10 +92,12 @@ export default function Files(prop: FilesProp) {
 
     setFileLoadingInstructions("Loading...");
     setBackgroundImage(backgroundImage);
-    ImageTracer.imageToSVG(printingImage, (txt: string) =>
-      setPrintingImageSVG(txt)
+    ImageTracer.imageToSVG(printingImage, (svg: string) =>
+      setPrintingImageSVG(svg)
     );
-    setCuttingImage(cuttingImage);
+    ImageTracer.imageToSVG(cuttingImage, (svg: string) =>
+      setCuttingImageSVG(svg)
+    );
     setFileLoading(false);
   }
 
@@ -125,7 +127,7 @@ export default function Files(prop: FilesProp) {
             setImageSize(Number(e.target.value) == 3 ? 3 : 7);
             setBackgroundImage(null);
             setPrintingImageSVG(null);
-            setCuttingImage(null);
+            setCuttingImageSVG(null);
           }}
         >
           <option value={3}>3 Inch</option>
@@ -147,7 +149,7 @@ export default function Files(prop: FilesProp) {
         {printingImageSVG && (
           <button onClick={printPrintFile}>Print Printing File</button>
         )}
-        {cuttingImage && (
+        {cuttingImageSVG && (
           <button onClick={printCuttingFile}>Print Cutting File</button>
         )}
       </div>
@@ -221,9 +223,11 @@ export default function Files(prop: FilesProp) {
               width: `calc(${imageSize}in + 14mm)`,
             }}
           >
-            {cuttingImage && <img src={cuttingImage} alt="" />}
+            {cuttingImageSVG && (
+              <div dangerouslySetInnerHTML={{ __html: cuttingImageSVG }}></div>
+            )}
           </div>
-          {cuttingImage && (
+          {cuttingImageSVG && (
             <div
               className="bottom"
               style={{
