@@ -25,10 +25,10 @@ export default function Files(prop: FilesProp) {
     | "Creating Main File"
     | "Creating Printing File"
     | "Creating Cutting File"
+    | "Adjusting Box Size"
     | "Loading..."
   >("Loading...");
 
-  const cuttingFileResultImage = useRef<HTMLImageElement | null>(null);
   const [cuttingFileResultWidth, setCuttingFileResultWidth] = useState(0);
 
   const backgroundImageFile = useRef<HTMLDivElement | null>(null);
@@ -65,7 +65,7 @@ export default function Files(prop: FilesProp) {
     `,
   });
 
-  async function getImage() {
+  async function createFiles() {
     setFileLoading(true);
 
     setFileLoadingInstructions("Creating Main File");
@@ -83,8 +83,14 @@ export default function Files(prop: FilesProp) {
       )
     );
 
-    setFileLoadingInstructions("Loading...");
+    setFileLoadingInstructions("Adjusting Box Size");
+    const imgForBoxWidth = new Image();
+    imgForBoxWidth.src = cuttingImage;
+    await imgForBoxWidth.decode();
+    const boxWidth = imgForBoxWidth.width;
+    setCuttingFileResultWidth(boxWidth);
 
+    setFileLoadingInstructions("Loading...");
     setBackgroundImage(backgroundImage);
     ImageTracer.imageToSVG(printingImage, (txt: string) =>
       setPrintingImageSVG(txt)
@@ -125,7 +131,7 @@ export default function Files(prop: FilesProp) {
           <option value={3}>3 Inch</option>
           <option value={7}>7 Inch</option>
         </select>
-        <button onClick={getImage} disabled={fileLoading}>
+        <button onClick={createFiles} disabled={fileLoading}>
           {fileLoading
             ? fileLoadingInstructions
             : "Create Printing & Cutting Files"}
@@ -215,21 +221,7 @@ export default function Files(prop: FilesProp) {
               width: `calc(${imageSize}in + 14mm)`,
             }}
           >
-            {cuttingImage && (
-              <img
-                src={cuttingImage}
-                alt=""
-                ref={cuttingFileResultImage}
-                onLoad={() => {
-                  if (cuttingFileResultImage.current) {
-                    setCuttingFileResultWidth(
-                      cuttingFileResultImage.current.getBoundingClientRect()
-                        .width
-                    );
-                  }
-                }}
-              />
-            )}
+            {cuttingImage && <img src={cuttingImage} alt="" />}
           </div>
           {cuttingImage && (
             <div
