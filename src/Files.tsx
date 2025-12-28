@@ -7,6 +7,8 @@ import {
 } from "./utils/silhouettefill";
 import resizeImageToInchHeight from "./utils/resizeImage";
 import { useReactToPrint } from "react-to-print";
+// @ts-expect-error - ImageTracerJS does not have types
+import ImageTracer from "imagetracerjs/imagetracer_v1.2.6.js";
 
 type FilesProp = { image: string };
 
@@ -15,7 +17,7 @@ export default function Files(prop: FilesProp) {
   const [mainImage, setMainImage] = useState(prop.image);
 
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
-  const [printingImage, setPrintingImage] = useState<string | null>(null);
+  const [printingImageSVG, setPrintingImageSVG] = useState<string | null>(null);
   const [cuttingImage, setCuttingImage] = useState<string | null>(null);
 
   const [fileLoading, setFileLoading] = useState(false);
@@ -84,7 +86,9 @@ export default function Files(prop: FilesProp) {
     setFileLoadingInstructions("Loading...");
 
     setBackgroundImage(backgroundImage);
-    setPrintingImage(printingImage);
+    ImageTracer.imageToSVG(printingImage, (txt: string) =>
+      setPrintingImageSVG(txt)
+    );
     setCuttingImage(cuttingImage);
     setFileLoading(false);
   }
@@ -114,7 +118,7 @@ export default function Files(prop: FilesProp) {
           onChange={(e) => {
             setImageSize(Number(e.target.value) == 3 ? 3 : 7);
             setBackgroundImage(null);
-            setPrintingImage(null);
+            setPrintingImageSVG(null);
             setCuttingImage(null);
           }}
         >
@@ -134,7 +138,7 @@ export default function Files(prop: FilesProp) {
         {backgroundImage && (
           <button onClick={printMainFile}>Print Main File</button>
         )}
-        {printingImage && (
+        {printingImageSVG && (
           <button onClick={printPrintFile}>Print Printing File</button>
         )}
         {cuttingImage && (
@@ -186,7 +190,9 @@ export default function Files(prop: FilesProp) {
               width: `calc(${imageSize}in + 14mm)`,
             }}
           >
-            {printingImage && <img src={printingImage} alt="" />}
+            {printingImageSVG && (
+              <div dangerouslySetInnerHTML={{ __html: printingImageSVG }}></div>
+            )}
           </div>
         </div>
         <div
