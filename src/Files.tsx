@@ -15,6 +15,7 @@ type FilesProp = { image: string };
 export default function Files(prop: FilesProp) {
   const [imageSize, setImageSize] = useState<3 | 7>(3);
   const [mainImage, setMainImage] = useState(prop.image);
+  const [alphaThreshold, setAlphaThreshold] = useState(150);
 
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [printingImageSVG, setPrintingImageSVG] = useState<string | null>(null);
@@ -69,7 +70,11 @@ export default function Files(prop: FilesProp) {
     setFileLoading(true);
 
     setFileLoadingInstructions("Creating Main File");
-    const backgroundImage = await resizeImageToInchHeight(mainImage, imageSize);
+    const backgroundImage = await resizeImageToInchHeight(
+      mainImage,
+      imageSize,
+      alphaThreshold
+    );
 
     setFileLoadingInstructions("Creating Printing File");
     const printingImage = await fillImageWithColor(
@@ -116,6 +121,27 @@ export default function Files(prop: FilesProp) {
               setMainImage(URL.createObjectURL(e.target.files[0]));
             }
           }}
+        />
+      </div>
+      <div className="options" style={{ alignItems: "center" }}>
+        <label htmlFor="threshold">
+          Adjust this to remove unnecessary dots:{" "}
+        </label>
+        <input
+          type="range"
+          name="threshold"
+          id="threshold"
+          min={0}
+          max={255}
+          onChange={(e) => setAlphaThreshold(Number(e.target.value))}
+          value={alphaThreshold}
+        />
+        <input
+          type="number"
+          min={0}
+          max={255}
+          value={alphaThreshold}
+          onChange={(e) => setAlphaThreshold(Number(e.target.value))}
         />
       </div>
       <div className="options">
