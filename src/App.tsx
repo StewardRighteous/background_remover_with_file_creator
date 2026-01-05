@@ -1,12 +1,14 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { pipeline } from "@huggingface/transformers";
 import Files from "./Files";
 import { cropTransparentImage } from "./utils/cropTransparentImage";
+import Cropper from "react-easy-crop";
+import { type PixelCrop, getCroppedImg } from "./utils/getCroppedImg";
 
 type ModelType = "briaai/RMBG-1.4" | "Xenova/modnet";
 
 export default function App() {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<string | null>(null);
   const [outputImage, setOutputImage] = useState<string | null>(null);
   const [model, setModel] = useState<ModelType>("briaai/RMBG-1.4");
   const [loading, setLoading] = useState(false);
@@ -17,6 +19,38 @@ export default function App() {
     | "Converting Image"
     | "Showing Output"
   >("Loading Model");
+
+  const [isCropImage, setIsCropImage] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<PixelCrop | null>(
+    null
+  );
+  const [aspectRatio, setAspectRatio] = useState(1);
+
+  useEffect(() => {
+    return () => {
+      if (file && file.startsWith("blob:")) {
+        URL.revokeObjectURL(file);
+      }
+    };
+  }, [file]);
+
+  const onCropComplete = (_: PixelCrop, croppedPixels: PixelCrop) => {
+    setCroppedAreaPixels(croppedPixels);
+  };
+
+  const handleCrop = async () => {
+    if (!file || !croppedAreaPixels) return;
+
+    const croppedBlob = await getCroppedImg(file, croppedAreaPixels);
+    const croppedUrl = URL.createObjectURL(croppedBlob);
+
+    setFile(croppedUrl);
+    setIsCropImage(false);
+    setZoom(1);
+    setCrop({ x: 0, y: 0 });
+  };
 
   async function removeBackground() {
     if (!file) return;
@@ -29,7 +63,7 @@ export default function App() {
       });
 
       setLoadingInstructions("Removing Background");
-      const imageUrl = URL.createObjectURL(file);
+      const imageUrl = file;
       const results = await segmenter(imageUrl);
       const mask = results[0].mask;
 
@@ -88,8 +122,15 @@ export default function App() {
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          onChange={(e) => {
+            const selectedFile = e.target.files?.item(0);
+            if (!selectedFile) return;
+
+            const objectUrl = URL.createObjectURL(selectedFile);
+            setFile(objectUrl);
+          }}
         />
+
         <button onClick={removeBackground} disabled={!file || loading}>
           {loading ? loadingInstructions : "Remove Background"}
         </button>
@@ -105,14 +146,62 @@ export default function App() {
         )}
         <hr />
         <div className="images">
-          {file && (
+          {isCropImage && file && (
+            <div
+              style={{ position: "relative", height: "800px", width: "800px" }}
+            >
+              <Cropper
+                image={file}
+                crop={crop}
+                zoom={zoom}
+                aspect={aspectRatio}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+                cropShape="rect"
+              />
+            </div>
+          )}
+
+          {isCropImage && file && (
+            <div
+              style={{
+                marginTop: 10,
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <select
+                name="aspect-ratio"
+                id="aspect-ratio"
+                onChange={(e) => setAspectRatio(Number(e.target.value))}
+              >
+                <option value={1}>Square</option>
+                <option value={16 / 9}>Landscape</option>
+                <option value={9 / 16}>Potrait</option>
+                <option value={4 / 3}> Landscape (4:3)</option>
+                <option value={3 / 4}>Potrait(3:4)</option>
+              </select>
+              <label htmlFor="zoom">Zoom</label>
+              <input
+                id="zoom"
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+              />
+              <button onClick={handleCrop}>Apply Crop</button>
+              <button onClick={() => setIsCropImage(false)}>Cancel</button>
+            </div>
+          )}
+          {file && !isCropImage && (
             <div className="image-container">
               <p>Original:</p>
-              <img
-                src={URL.createObjectURL(file)}
-                alt="Original"
-                ref={originalImage}
-              />
+              <button onClick={() => setIsCropImage(true)}>Crop Image</button>
+              <img src={file} alt="Original" ref={originalImage} />
             </div>
           )}
           {outputImage && (
