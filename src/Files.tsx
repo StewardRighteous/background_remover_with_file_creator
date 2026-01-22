@@ -15,7 +15,7 @@ type FilesProp = { image: string };
 export default function Files(prop: FilesProp) {
   const [imageSize, setImageSize] = useState<3 | 7>(3);
   const [mainImage, setMainImage] = useState(prop.image);
-  const [alphaThreshold, setAlphaThreshold] = useState(1);
+
 
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [printingImageSVG, setPrintingImageSVG] = useState<string | null>(null);
@@ -70,11 +70,7 @@ export default function Files(prop: FilesProp) {
     setFileLoading(true);
 
     setFileLoadingInstructions("Creating Main File");
-    const backgroundImage = await resizeImageToInchHeight(
-      mainImage,
-      imageSize,
-      alphaThreshold,
-    );
+    const backgroundImage = await resizeImageToInchHeight(mainImage, imageSize);
 
     setFileLoadingInstructions("Creating Printing File");
     const printingImage = await fillImageWithColor(
@@ -154,18 +150,7 @@ export default function Files(prop: FilesProp) {
             }}
           />
         </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor="threshold">Threshold ({alphaThreshold})</label>
-          <input
-            type="range"
-            name="threshold"
-            id="threshold"
-            min={0}
-            max={255}
-            onChange={(e) => setAlphaThreshold(Number(e.target.value))}
-            value={alphaThreshold}
-          />
-        </div>
+       
       </div>
 
       {/* Print files Buttons */}

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { pipeline } from "@huggingface/transformers";
 import Files from "./Files";
-import { cropTransparentImage } from "./utils/cropTransparentImage";
 import Cropper from "react-easy-crop";
 import { type PixelCrop, getCroppedImg } from "./utils/getCroppedImg";
+import { cropCanvasByAlpha } from "./utils/cropCanvasByAlpha";
 
 type ModelType = "briaai/RMBG-1.4" | "Xenova/modnet";
 
@@ -13,6 +13,7 @@ export default function App() {
   const [model, setModel] = useState<ModelType>("briaai/RMBG-1.4");
   const [loading, setLoading] = useState(false);
   const originalImage = useRef<HTMLImageElement | null>(null);
+  const [alphaThreshold, setAlphaThreshold] = useState(1);
   const [loadingInstructions, setLoadingInstructions] = useState<
     | "Loading Model"
     | "Removing Background"
@@ -26,7 +27,8 @@ export default function App() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<PixelCrop | null>(
     null,
   );
-  const [aspectRatio, setAspectRatio] = useState(1);
+  const [aspectWidth, setAspectWidth] = useState(9);
+  const [aspectHeight, setAspectHeight] = useState(16);
 
   useEffect(() => {
     return () => {
@@ -73,7 +75,7 @@ export default function App() {
 
       setLoadingInstructions("Converting Image");
       const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d")!;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
       canvas.width = img.width;
       canvas.height = img.height;
 
@@ -89,8 +91,8 @@ export default function App() {
       ctx.putImageData(imageData, 0, 0);
 
       setLoadingInstructions("Showing Output");
-      const transparentPNG = canvas.toDataURL("image/png");
-      const croppedPNG = await cropTransparentImage(transparentPNG);
+      const transparentPNG = cropCanvasByAlpha(canvas, alphaThreshold);
+      const croppedPNG = transparentPNG.toDataURL("image/png");
 
       setOutputImage(croppedPNG);
     } catch (e) {
@@ -102,7 +104,7 @@ export default function App() {
 
   return (
     <>
-      <div className="m-4 grid gap-4">
+      <div className="m-4 grid gap-4 justify-items-center">
         {/* Main Head */}
         <div className="flex justify-center items-center gap-4">
           <label htmlFor="model"> Choose Model:</label>
@@ -159,6 +161,19 @@ export default function App() {
             </ul>
           )}
         </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="threshold ">Threshold ({alphaThreshold})</label>
+          <input
+            className="w-40"
+            type="range"
+            name="threshold"
+            id="threshold"
+            min={0}
+            max={255}
+            onChange={(e) => setAlphaThreshold(Number(e.target.value))}
+            value={alphaThreshold}
+          />
+        </div>
 
         <div>
           {/* Crop Area  */}
@@ -169,7 +184,7 @@ export default function App() {
                   image={file}
                   crop={crop}
                   zoom={zoom}
-                  aspect={aspectRatio}
+                  aspect={aspectWidth / aspectHeight}
                   onCropChange={setCrop}
                   onCropComplete={onCropComplete}
                   onZoomChange={setZoom}
@@ -180,36 +195,32 @@ export default function App() {
             {isCropImage && file && (
               <div className="grid grid-cols-2 w-50 h-20 gap-2.5">
                 <label htmlFor="aspect-ratio">Aspect Ratio</label>
-                <select
-                  className="border"
-                  id="aspect-ratio"
-                  onChange={(e) => setAspectRatio(Number(e.target.value))}
-                >
-                  <option value={1}>1:1</option>
-                  <option value={4 / 5}>4:5</option>
-                  <option value={3 / 4}>3:4</option>
-                  <option value={9 / 16}>9:16</option>
-                  <option value={2 / 3}>2:3</option>
-                  <option value={5 / 8}>5:8</option>
-                  <option value={3 / 2}>3:2</option>
-                  <option value={4 / 3}>4:3</option>
-                  <option value={5 / 4}>5:4</option>
-                  <option value={7 / 5}>7:5</option>
-                  <option value={16 / 9}>16:9</option>
-                  <option value={18 / 9}>18:9</option>
-                  <option value={21 / 9}>21:9</option>
-                  <option value={19.5 / 9}>19.5:9</option>
-                  <option value={2}>2:1</option>
-                  <option value={3}>3:1</option>
-                  <option value={4}>4:1</option>
-                  <option value={5}>5:1</option>
-                  <option value={1 / Math.SQRT2}>A-Series (√2:1)</option>
-                  <option value={8.5 / 11}>Letter (8.5:11)</option>
-                  <option value={11 / 8.5}>Letter (Landscape)</option>
-                  <option value={5 / 3}>5:3</option>
-                  <option value={14 / 9}>14:9</option>
-                  <option value={15 / 9}>15:9</option>
-                </select>
+                <div className="flex">
+                  <input
+                    className="border w-20 p-1"
+                    type="number"
+                    name="a-w"
+                    id="a-w"
+                    value={aspectWidth}
+                    onChange={(e) => {
+                      if (e.target.value !== null) {
+                        setAspectWidth(Number(e.target.value));
+                      }
+                    }}
+                  />
+                  <input
+                    className="border w-20 p-1"
+                    type="number"
+                    name="a-h"
+                    id="a-h"
+                    value={aspectHeight}
+                    onChange={(e) => {
+                      if (e.target.value !== null) {
+                        setAspectHeight(Number(e.target.value));
+                      }
+                    }}
+                  />
+                </div>
                 <label htmlFor="zoom">Zoom ({zoom})</label>
                 <input
                   id="zoom"
@@ -259,11 +270,19 @@ export default function App() {
                 {loading ? (
                   <p>Loading...</p>
                 ) : (
-                  <img
-                    src={outputImage}
-                    alt="Background Removed"
-                    className="size-100 object-contain"
-                  />
+                  <>
+                    <p>
+                      Crop the Image so it has less white spaces inside the
+                      border
+                    </p>
+                    <div className="size-100 flex justify-center">
+                      <img
+                        src={outputImage}
+                        alt="Background Removed"
+                        className="border object-contain max-h-full max-w-full"
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             )}
