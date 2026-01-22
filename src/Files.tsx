@@ -3,7 +3,6 @@ import addMmBorder from "./utils/addMmBorder";
 import {
   fillImageWithColor,
   addBottomRedRectangleMm,
-  fillOuterSilhouetteRed,
 } from "./utils/silhouettefill";
 import resizeImageToInchHeight from "./utils/resizeImage";
 import { useReactToPrint } from "react-to-print";
@@ -15,7 +14,6 @@ type FilesProp = { image: string };
 export default function Files(prop: FilesProp) {
   const [imageSize, setImageSize] = useState<3 | 7>(3);
   const [mainImage, setMainImage] = useState(prop.image);
-
 
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [printingImageSVG, setPrintingImageSVG] = useState<string | null>(null);
@@ -78,10 +76,10 @@ export default function Files(prop: FilesProp) {
     );
 
     setFileLoadingInstructions("Creating Cutting File");
-    const cuttingImage = await fillOuterSilhouetteRed(
-      await addBottomRedRectangleMm(
-        await fillImageWithColor(await addMmBorder(backgroundImage, 14), "red"),
-      ),
+    const bottomRectSize = imageSize == 3 ? 14 : 28;
+    const cuttingImage = await addBottomRedRectangleMm(
+      await fillImageWithColor(await addMmBorder(backgroundImage, 14), "red"),
+      bottomRectSize,
     );
 
     setFileLoadingInstructions("Adjusting Box Size");
@@ -150,7 +148,6 @@ export default function Files(prop: FilesProp) {
             }}
           />
         </div>
-       
       </div>
 
       {/* Print files Buttons */}
@@ -231,7 +228,7 @@ export default function Files(prop: FilesProp) {
           </div>
           {/* Cutting File */}
           <div
-            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700 flex flex-col items-center p-1`}
+            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700 flex flex-col items-center p-1 relative`}
             ref={cuttingImageFile}
             style={{
               width:
