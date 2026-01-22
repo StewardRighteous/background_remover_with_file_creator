@@ -24,7 +24,7 @@ export default function App() {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<PixelCrop | null>(
-    null
+    null,
   );
   const [aspectRatio, setAspectRatio] = useState(1);
 
@@ -102,121 +102,179 @@ export default function App() {
 
   return (
     <>
-      <div className="container">
-        <h2>Background Remover</h2>
-        <select
-          name="model"
-          id="model"
-          value={model}
-          onChange={(e) =>
-            setModel(
-              e.target.value === "briaai/RMBG-1.4"
-                ? "briaai/RMBG-1.4"
-                : "Xenova/modnet"
-            )
-          }
-        >
-          <option value="briaai/RMBG-1.4">Model 1</option>
-          <option value="Xenova/modnet">Model 2</option>
-        </select>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const selectedFile = e.target.files?.item(0);
-            if (!selectedFile) return;
-
-            const objectUrl = URL.createObjectURL(selectedFile);
-            setFile(objectUrl);
-          }}
-        />
-
-        <button onClick={removeBackground} disabled={!file || loading}>
-          {loading ? loadingInstructions : "Remove Background"}
-        </button>
-        {loading && (
-          <ul>
-            <li>This will take time and data !</li>
-            <li>If the browser asks to exit page select "wait"!</li>
-            <li>The lower the image size the faster the website will be !</li>
-            <li>
-              If you are not satisfied with the output, select and try "model 2"
-            </li>
-          </ul>
-        )}
-        <hr />
-        <div className="images">
-          {isCropImage && file && (
-            <div
-              style={{ position: "relative", height: "800px", width: "800px" }}
-            >
-              <Cropper
-                image={file}
-                crop={crop}
-                zoom={zoom}
-                aspect={aspectRatio}
-                onCropChange={setCrop}
-                onCropComplete={onCropComplete}
-                onZoomChange={setZoom}
-                cropShape="rect"
-              />
-            </div>
+      <div className="m-4 grid gap-4">
+        {/* Main Head */}
+        <div className="flex justify-center items-center gap-4">
+          <label htmlFor="model"> Choose Model:</label>
+          <select
+            className="border"
+            name="model"
+            id="model"
+            value={model}
+            onChange={(e) =>
+              setModel(
+                e.target.value === "briaai/RMBG-1.4"
+                  ? "briaai/RMBG-1.4"
+                  : "Xenova/modnet",
+              )
+            }
+          >
+            <option value="briaai/RMBG-1.4">Model 1</option>
+            <option value="Xenova/modnet">Model 2</option>
+          </select>
+          <label
+            htmlFor="choose-file"
+            className="border w-40 text-center p-1 bg-blue-500 text-white"
+          >
+            Select File
+          </label>
+          <input
+            id="choose-file"
+            className="hidden"
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const selectedFile = e.target.files?.item(0);
+              if (!selectedFile) return;
+              const objectUrl = URL.createObjectURL(selectedFile);
+              setFile(objectUrl);
+            }}
+          />
+          <button
+            onClick={removeBackground}
+            disabled={!file || loading}
+            className="w-40 p-1 border border-red-500 text-red-500"
+          >
+            {loading ? loadingInstructions : "Remove Background"}
+          </button>
+          {loading && (
+            <ul>
+              <li>This will take time and data !</li>
+              <li>If the browser asks to exit page select "wait"!</li>
+              <li>The lower the image size the faster the website will be !</li>
+              <li>
+                If you are not satisfied with the output, select and try "model
+                2"
+              </li>
+            </ul>
           )}
+        </div>
 
-          {isCropImage && file && (
-            <div
-              style={{
-                marginTop: 10,
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              <select
-                name="aspect-ratio"
-                id="aspect-ratio"
-                onChange={(e) => setAspectRatio(Number(e.target.value))}
-              >
-                <option value={1}>Square</option>
-                <option value={16 / 9}>Landscape</option>
-                <option value={9 / 16}>Potrait</option>
-                <option value={4 / 3}> Landscape (4:3)</option>
-                <option value={3 / 4}>Potrait(3:4)</option>
-              </select>
-              <label htmlFor="zoom">Zoom</label>
-              <input
-                id="zoom"
-                type="range"
-                min={1}
-                max={3}
-                step={0.1}
-                value={zoom}
-                onChange={(e) => setZoom(Number(e.target.value))}
-              />
-              <button onClick={handleCrop}>Apply Crop</button>
-              <button onClick={() => setIsCropImage(false)}>Cancel</button>
-            </div>
-          )}
-          {file && !isCropImage && (
-            <div className="image-container">
-              <p>Original:</p>
-              <button onClick={() => setIsCropImage(true)}>Crop Image</button>
-              <img src={file} alt="Original" ref={originalImage} />
-            </div>
-          )}
-          {outputImage && (
-            <div className="image-container">
-              <p>Result:</p>
-              {loading ? (
-                <p>{loadingInstructions}</p>
-              ) : (
-                <img src={outputImage} alt="Background Removed" />
-              )}
-            </div>
+        <div>
+          {/* Crop Area  */}
+          <div className="flex justify-center gap-6">
+            {isCropImage && file && (
+              <div className="size-200 relative">
+                <Cropper
+                  image={file}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={aspectRatio}
+                  onCropChange={setCrop}
+                  onCropComplete={onCropComplete}
+                  onZoomChange={setZoom}
+                  cropShape="rect"
+                />
+              </div>
+            )}
+            {isCropImage && file && (
+              <div className="grid grid-cols-2 w-50 h-20 gap-2.5">
+                <label htmlFor="aspect-ratio">Aspect Ratio</label>
+                <select
+                  className="border"
+                  id="aspect-ratio"
+                  onChange={(e) => setAspectRatio(Number(e.target.value))}
+                >
+                  <option value={1}>1:1</option>
+                  <option value={4 / 5}>4:5</option>
+                  <option value={3 / 4}>3:4</option>
+                  <option value={9 / 16}>9:16</option>
+                  <option value={2 / 3}>2:3</option>
+                  <option value={5 / 8}>5:8</option>
+                  <option value={3 / 2}>3:2</option>
+                  <option value={4 / 3}>4:3</option>
+                  <option value={5 / 4}>5:4</option>
+                  <option value={7 / 5}>7:5</option>
+                  <option value={16 / 9}>16:9</option>
+                  <option value={18 / 9}>18:9</option>
+                  <option value={21 / 9}>21:9</option>
+                  <option value={19.5 / 9}>19.5:9</option>
+                  <option value={2}>2:1</option>
+                  <option value={3}>3:1</option>
+                  <option value={4}>4:1</option>
+                  <option value={5}>5:1</option>
+                  <option value={1 / Math.SQRT2}>A-Series (√2:1)</option>
+                  <option value={8.5 / 11}>Letter (8.5:11)</option>
+                  <option value={11 / 8.5}>Letter (Landscape)</option>
+                  <option value={5 / 3}>5:3</option>
+                  <option value={14 / 9}>14:9</option>
+                  <option value={15 / 9}>15:9</option>
+                </select>
+                <label htmlFor="zoom">Zoom ({zoom})</label>
+                <input
+                  id="zoom"
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                />
+                <button
+                  onClick={handleCrop}
+                  className="bg-blue-500 text-white p-1 rounded"
+                >
+                  Apply Crop
+                </button>
+                <button
+                  onClick={() => setIsCropImage(false)}
+                  className="border rounded text-red-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+            {/* Original Image */}
+            {file && !isCropImage && (
+              <div className="size-111 flex flex-col gap-1 items-center">
+                <p className="font-bold">Original</p>
+                <button
+                  onClick={() => setIsCropImage(true)}
+                  className="border w-40"
+                >
+                  Crop Image
+                </button>
+                <img
+                  src={file}
+                  alt="Original"
+                  ref={originalImage}
+                  className="size-100 object-contain"
+                />
+              </div>
+            )}
+            {/* Background Removed Image */}
+            {outputImage && !isCropImage && (
+              <div className="size-111 flex flex-col gap-1 items-center">
+                <p className="font-bold">Result</p>
+                {loading ? (
+                  <div className="loader"></div>
+                ) : (
+                  <img
+                    src={outputImage}
+                    alt="Background Removed"
+                    className="size-100 object-contain"
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <div>
+          {!isCropImage && outputImage && originalImage.current && (
+            <Files image={outputImage} />
           )}
         </div>
       </div>
-      {outputImage && originalImage.current && <Files image={outputImage} />}
     </>
   );
 }
