@@ -15,7 +15,7 @@ type FilesProp = { image: string };
 export default function Files(prop: FilesProp) {
   const [imageSize, setImageSize] = useState<3 | 7>(3);
   const [mainImage, setMainImage] = useState(prop.image);
-  const [alphaThreshold, setAlphaThreshold] = useState(150);
+  const [alphaThreshold, setAlphaThreshold] = useState(1);
 
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [printingImageSVG, setPrintingImageSVG] = useState<string | null>(null);
@@ -107,171 +107,175 @@ export default function Files(prop: FilesProp) {
   }
 
   return (
-    <>
-      <div className="options">
-        <label htmlFor="image-change">
-          Change Image (You can upload your file here, if you are not satisfied
-          with the background removal):
-        </label>
-        <input
-          type="file"
-          id="image-change"
-          onChange={(e) => {
-            if (e.target.files !== null) {
-              setMainImage(URL.createObjectURL(e.target.files[0]));
-            }
-          }}
-        />
-      </div>
-      <div className="options" style={{ alignItems: "center" }}>
-        <label htmlFor="threshold">
-          Adjust this to remove unnecessary dots:{" "}
-        </label>
-        <input
-          type="range"
-          name="threshold"
-          id="threshold"
-          min={0}
-          max={255}
-          onChange={(e) => setAlphaThreshold(Number(e.target.value))}
-          value={alphaThreshold}
-        />
-        <input
-          type="number"
-          min={0}
-          max={255}
-          value={alphaThreshold}
-          onChange={(e) => setAlphaThreshold(Number(e.target.value))}
-        />
-      </div>
-      <div className="options">
-        <label htmlFor="bottom-inch">Image Size:</label>
-        <select
-          name="bottom-inch"
-          id="bottom-inch"
-          onChange={(e) => {
-            setImageSize(Number(e.target.value) == 3 ? 3 : 7);
-            setBackgroundImage(null);
-            setPrintingImageSVG(null);
-            setCuttingImageSVG(null);
-          }}
+    <div className="grid justify-items-center">
+      {/* Options Adjustment before creating files */}
+      <div className="flex m-2 items-center justify-center gap-2">
+        <div className="flex gap-1">
+          <label htmlFor="bottom-inch">Size:</label>
+          <select
+            className="border"
+            id="bottom-inch"
+            onChange={(e) => {
+              setImageSize(Number(e.target.value) == 3 ? 3 : 7);
+              setBackgroundImage(null);
+              setPrintingImageSVG(null);
+              setCuttingImageSVG(null);
+            }}
+          >
+            <option value={3}>3 Inch</option>
+            <option value={7}>7 Inch</option>
+          </select>
+        </div>
+        <button
+          onClick={createFiles}
+          disabled={fileLoading}
+          className="border bg-blue-500 p-2 rounded text-white"
         >
-          <option value={3}>3 Inch</option>
-          <option value={7}>7 Inch</option>
-        </select>
-        <button onClick={createFiles} disabled={fileLoading}>
-          {fileLoading
-            ? fileLoadingInstructions
-            : "Create Printing & Cutting Files"}
+          Create Printing & Cutting Files
         </button>
-        <button onClick={() => setMainImage(prop.image)}>
+        <button onClick={() => setMainImage(prop.image)} className="border p-2">
           Use Result Image
         </button>
-      </div>
-      <div className="options">
-        {backgroundImage && (
-          <button onClick={printMainFile}>Print Main File</button>
-        )}
-        {printingImageSVG && (
-          <button onClick={printPrintFile}>Print Printing File</button>
-        )}
-        {cuttingImageSVG && (
-          <button onClick={printCuttingFile}>Print Cutting File</button>
-        )}
+        <div className="flex">
+          <label
+            htmlFor="image-change"
+            className="border rounded p-2 text-red-500"
+          >
+            Change Image
+          </label>
+          <input
+            className="hidden"
+            type="file"
+            id="image-change"
+            onChange={(e) => {
+              if (e.target.files !== null) {
+                setMainImage(URL.createObjectURL(e.target.files[0]));
+              }
+            }}
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="threshold">Threshold ({alphaThreshold})</label>
+          <input
+            type="range"
+            name="threshold"
+            id="threshold"
+            min={0}
+            max={255}
+            onChange={(e) => setAlphaThreshold(Number(e.target.value))}
+            value={alphaThreshold}
+          />
+        </div>
       </div>
 
-      <div className="files">
-        <div
-          className="background-removed"
-          ref={backgroundImageFile}
-          style={{
-            height: imageSize == 3 ? "5in" : "11in",
-            width:
-              cuttingFileResultWidth !== null
-                ? `${Math.ceil(cuttingFileResultWidth / 96) + 1}in`
-                : imageSize == 3
-                  ? "5in"
-                  : "9in",
-          }}
-        >
+      {/* Print files Buttons */}
+      {!fileLoading && (
+        <div className="flex m-2 items-center justify-center gap-2">
+          {backgroundImage && (
+            <button
+              className="border p-2 rounded bg-indigo-600 text-white"
+              onClick={printMainFile}
+            >
+              Print Main File
+            </button>
+          )}
+          {printingImageSVG && (
+            <button
+              className="border p-2 rounded  text-indigo-600"
+              onClick={printPrintFile}
+            >
+              Print Printing File
+            </button>
+          )}
+          {cuttingImageSVG && (
+            <button
+              className="border p-2 rounded text-indigo-600"
+              onClick={printCuttingFile}
+            >
+              Print Cutting File
+            </button>
+          )}
+        </div>
+      )}
+
+      {fileLoading && (
+        <p className="text-red-500">Loading: {fileLoadingInstructions}...</p>
+      )}
+
+      {/* Print Files */}
+      {!fileLoading && (
+        <div className="flex justify-center gap-3">
+          {/* Main File */}
           <div
-            className="center-box"
+            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700`}
+            ref={backgroundImageFile}
             style={{
-              height: `calc(${imageSize}in + 14mm)`,
-              width: `calc(${imageSize}in + 14mm)`,
+              width:
+                cuttingFileResultWidth !== null
+                  ? `${Math.ceil(cuttingFileResultWidth / 96) + 1}in`
+                  : imageSize == 3
+                    ? "5in"
+                    : "9in",
             }}
           >
             <img
               src={mainImage}
               alt=""
-              style={{
-                height: `${imageSize}in`,
-                width: `${imageSize}in`,
-                objectFit: "contain",
-              }}
+              className={`${imageSize == 3 ? "size-72" : "size-168"} object-contain`}
             />
           </div>
-        </div>
-        <div
-          className="printing-file"
-          ref={printingImageFile}
-          style={{
-            height: imageSize == 3 ? "5in" : "11in",
-            width:
-              cuttingFileResultWidth !== null
-                ? `${Math.ceil(cuttingFileResultWidth / 96) + 1}in`
-                : imageSize == 3
-                  ? "5in"
-                  : "9in",
-          }}
-        >
+          {/* Printing File */}
           <div
-            className="center-box"
+            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700`}
+            ref={printingImageFile}
             style={{
-              height: `calc(${imageSize}in + 14mm)`,
-              width: `calc(${imageSize}in + 14mm)`,
+              width:
+                cuttingFileResultWidth !== null
+                  ? `${Math.ceil(cuttingFileResultWidth / 96) + 1}in`
+                  : imageSize == 3
+                    ? "5in"
+                    : "9in",
             }}
           >
             {printingImageSVG && (
-              <div dangerouslySetInnerHTML={{ __html: printingImageSVG }}></div>
+              <div
+                dangerouslySetInnerHTML={{ __html: printingImageSVG }}
+                className={`${imageSize == 3 ? "size-[calc(3in+7mm)] " : "size-[calc(7in+7mm)]"} object-contain`}
+              ></div>
             )}
           </div>
-        </div>
-        <div
-          className="cutting-file"
-          ref={cuttingImageFile}
-          style={{
-            height: imageSize == 3 ? "5in" : "11in",
-            width:
-              cuttingFileResultWidth !== null
-                ? `${Math.ceil(cuttingFileResultWidth / 96) + 1}in`
-                : imageSize == 3
-                  ? "5in"
-                  : "9in",
-          }}
-        >
+          {/* Cutting File */}
           <div
-            className="center-box"
+            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700`}
+            ref={cuttingImageFile}
             style={{
-              height: `calc(${imageSize}in + 14mm)`,
-              width: `calc(${imageSize}in + 14mm)`,
+              width:
+                cuttingFileResultWidth !== null
+                  ? `${Math.ceil(cuttingFileResultWidth / 96) + 1}in`
+                  : imageSize == 3
+                    ? "5in"
+                    : "9in",
             }}
           >
             {cuttingImageSVG && (
-              <div dangerouslySetInnerHTML={{ __html: cuttingImageSVG }}></div>
+              <div
+                className={`${imageSize == 3 ? "size-[calc(3in+14mm)] " : "size-[calc(7in+14mm)]"} object-contain`}
+                dangerouslySetInnerHTML={{ __html: cuttingImageSVG }}
+              ></div>
+            )}
+
+            {cuttingImageSVG && (
+              <div
+                className={` ${imageSize == 3 ? "h-24" : "h-60"} rounded-[80px] m-4`}
+                style={{
+                  width: `calc(${cuttingFileResultWidth}px + 5rem)`,
+                  backgroundColor: "red",
+                }}
+              ></div>
             )}
           </div>
-          {cuttingImageSVG && (
-            <div
-              className="bottom"
-              style={{
-                height: `${imageSize == 3 ? 1 : 2.5}in`,
-                width: `calc(${cuttingFileResultWidth}px + 5rem)`,
-              }}
-            ></div>
-          )}
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 }

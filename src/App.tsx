@@ -257,7 +257,7 @@ export default function App() {
               <div className="size-111 flex flex-col gap-1 items-center">
                 <p className="font-bold">Result</p>
                 {loading ? (
-                  <div className="loader"></div>
+                  <p>Loading...</p>
                 ) : (
                   <img
                     src={outputImage}
