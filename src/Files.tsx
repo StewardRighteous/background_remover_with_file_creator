@@ -73,19 +73,19 @@ export default function Files(prop: FilesProp) {
     const backgroundImage = await resizeImageToInchHeight(
       mainImage,
       imageSize,
-      alphaThreshold
+      alphaThreshold,
     );
 
     setFileLoadingInstructions("Creating Printing File");
     const printingImage = await fillImageWithColor(
-      await addMmBorder(backgroundImage)
+      await addMmBorder(backgroundImage),
     );
 
     setFileLoadingInstructions("Creating Cutting File");
     const cuttingImage = await fillOuterSilhouetteRed(
       await addBottomRedRectangleMm(
-        await fillImageWithColor(await addMmBorder(backgroundImage, 14), "red")
-      )
+        await fillImageWithColor(await addMmBorder(backgroundImage, 14), "red"),
+      ),
     );
 
     setFileLoadingInstructions("Adjusting Box Size");
@@ -98,10 +98,10 @@ export default function Files(prop: FilesProp) {
     setFileLoadingInstructions("Loading...");
     setBackgroundImage(backgroundImage);
     ImageTracer.imageToSVG(printingImage, (svg: string) =>
-      setPrintingImageSVG(svg)
+      setPrintingImageSVG(svg),
     );
     ImageTracer.imageToSVG(cuttingImage, (svg: string) =>
-      setCuttingImageSVG(svg)
+      setCuttingImageSVG(svg),
     );
     setFileLoading(false);
   }
@@ -201,7 +201,15 @@ export default function Files(prop: FilesProp) {
               width: `calc(${imageSize}in + 14mm)`,
             }}
           >
-            {backgroundImage && <img src={backgroundImage} alt="" />}
+            <img
+              src={mainImage}
+              alt=""
+              style={{
+                height: `${imageSize}in`,
+                width: `${imageSize}in`,
+                objectFit: "contain",
+              }}
+            />
           </div>
         </div>
         <div
