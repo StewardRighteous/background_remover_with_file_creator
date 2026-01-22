@@ -192,7 +192,7 @@ export default function Files(prop: FilesProp) {
         <div className="flex justify-center gap-3">
           {/* Main File */}
           <div
-            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700`}
+            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700 flex justify-center p-1`}
             ref={backgroundImageFile}
             style={{
               width:
@@ -211,7 +211,7 @@ export default function Files(prop: FilesProp) {
           </div>
           {/* Printing File */}
           <div
-            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700`}
+            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700 flex justify-center p-1`}
             ref={printingImageFile}
             style={{
               width:
@@ -225,13 +225,13 @@ export default function Files(prop: FilesProp) {
             {printingImageSVG && (
               <div
                 dangerouslySetInnerHTML={{ __html: printingImageSVG }}
-                className={`${imageSize == 3 ? "size-[calc(3in+7mm)] " : "size-[calc(7in+7mm)]"} object-contain`}
+                className={`${imageSize == 3 ? "size-[calc(3in+7mm)] " : "size-[calc(7in+7mm)]"} object-contain flex justify-center`}
               ></div>
             )}
           </div>
           {/* Cutting File */}
           <div
-            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700`}
+            className={`${imageSize == 3 ? "h-120" : "h-264"} border-[1pt] border-blue-700 flex flex-col items-center p-1`}
             ref={cuttingImageFile}
             style={{
               width:
@@ -244,7 +244,7 @@ export default function Files(prop: FilesProp) {
           >
             {cuttingImageSVG && (
               <div
-                className={`${imageSize == 3 ? "size-[calc(3in+14mm)] " : "size-[calc(7in+14mm)]"} object-contain`}
+                className={`${imageSize == 3 ? "size-[calc(3in+14mm)] " : "size-[calc(7in+14mm)]"} object-contain flex justify-center p-1`}
                 dangerouslySetInnerHTML={{ __html: cuttingImageSVG }}
               ></div>
             )}

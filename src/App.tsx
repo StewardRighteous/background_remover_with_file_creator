@@ -202,6 +202,7 @@ export default function App() {
                     name="a-w"
                     id="a-w"
                     value={aspectWidth}
+                    step={0.1}
                     onChange={(e) => {
                       if (e.target.value !== null) {
                         setAspectWidth(Number(e.target.value));
@@ -213,6 +214,7 @@ export default function App() {
                     type="number"
                     name="a-h"
                     id="a-h"
+                    step={0.1}
                     value={aspectHeight}
                     onChange={(e) => {
                       if (e.target.value !== null) {
@@ -250,7 +252,10 @@ export default function App() {
               <div className="size-111 flex flex-col gap-1 items-center">
                 <p className="font-bold">Original</p>
                 <button
-                  onClick={() => setIsCropImage(true)}
+                  onClick={() => {
+                    setIsCropImage(true);
+                    setOutputImage(null);
+                  }}
                   className="border w-40"
                 >
                   Crop Image
